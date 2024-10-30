@@ -1,5 +1,6 @@
 package lotto.view
 
+import lotto.model.Lotto
 import lotto.model.Winning
 
 class OutputView {
@@ -8,16 +9,16 @@ class OutputView {
         printMessageWithNumber(MSG_OUTPUT_LOTTO_PURCHASE_COUNT, purchaseCount)
     }
 
-    fun printLottoGenerateNumber(numbers: List<List<Int>>) {
-        numbers.forEach { line ->
-            println(line)
+    fun printLottoGenerateNumber(lottoNumbers: List<Lotto>) {
+        lottoNumbers.forEach { line ->
+            println(line.getNumbers())
         }
     }
 
-    fun printLottoWinningStat(winning: List<Winning>) {
+    fun printLottoWinningStat(winning: Map<Winning, Int>) {
         println(MSG_OUTPUT_WINNING_STAT)
-        winning.forEach {
-            printLottoWinningCount(it)
+        winning.forEach { winningNumber, count ->
+            printLottoWinningCount(winningNumber, count)
         }
     }
 
@@ -25,8 +26,8 @@ class OutputView {
         printMessageWithNumber(MSG_OUTPUT_EARNING_RATE, earningRate)
     }
 
-    fun printLottoWinningCount(winning: Winning) {
-        printMessageWithNumber(getWinningMessage(winning), winning.count)
+    private fun printLottoWinningCount(winning: Winning, count: Int) {
+        printMessageWithNumber(getWinningMessage(winning), count)
     }
 
     fun getWinningMessage(winning: Winning): String {

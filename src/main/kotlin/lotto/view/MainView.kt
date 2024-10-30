@@ -6,7 +6,7 @@ import java.lang.IllegalStateException
 class MainView(
     private val inputView: InputView,
     private val outputView: OutputView,
-    private val lotto: LottoManager,
+    private val lottoManager: LottoManager,
 ) {
 
     fun start() {
@@ -15,13 +15,13 @@ class MainView(
                 val count = inputPurchaseCount()
                 outputView.printLottoPurchaseCount(count)
 
-                lotto.generateUserLottoNumbers(count)
-                outputView.printLottoGenerateNumber(lotto.userLottoNumbers)
+                lottoManager.generateUserLottoNumbers(count)
+                outputView.printLottoGenerateNumber(lottoManager.userLottoNumbers)
 
                 val winningNumbers = inputWinningNumbers()
                 val bonusNumbers = inputBonusNumber()
 
-
+                lottoManager.checkWinning(winningNumbers, bonusNumbers)
 
             } catch (e: IllegalArgumentException) {
                 println(e.message)

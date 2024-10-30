@@ -1,6 +1,6 @@
 package lotto.model
 
-enum class Winning(val count: Int) {
+enum class Winning(var count: Int) {
     THREE(0),
     FOUR(0),
     FIVE_NOT_BONUS(0),
