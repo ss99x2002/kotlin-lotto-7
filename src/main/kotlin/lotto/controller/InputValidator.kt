@@ -1,33 +1,37 @@
 package lotto.controller
 
+import lotto.util.ErrorType
+
 class InputValidator {
 
     fun validatePriceInput(price: String) {
-        require(price.isNotEmpty()) { "구입 금액은 빈 값이 될 수 없습니다. " }
+        require(price.isNotEmpty()) { ErrorType.PRICE_INPUT_NOT_EMPTY }
         price.validateNumberInput()
-        require(price.toInt() % LOTTO_PRICE_UNIT == ZERO) { "구입 금액은 1000원 단위로 입력되어야 합니다. " }
+        require(price.toInt() % LOTTO_PRICE_UNIT == ZERO) { ErrorType.PRICE_INPUT_NOT_1000_UNIT }
     }
 
     fun validateWinningNumbers(winningNumbers: String) {
         val splitNumber = winningNumbers.split(",")
         splitNumber.forEach {
-            it.validateNumberInput() // 숫자 맞는지
+            it.validateNumberInput()
         }
-        require(splitNumber.distinct().size == LOTTO_NUMBER_COUNT_CONDITION) { "6개 중복 x"} // 사이즈 6개 맞는지
+        require(splitNumber.size == LOTTO_NUMBER_COUNT_CONDITION) { ErrorType.LOTTO_NUMBER_INPUT_COUNT_CONDITION } // 사이즈 6개 맞는지
+        require(splitNumber.all { it.toInt() in 1..45 }) { ErrorType.LOTTO_NUMBER_INPUT_RANGE_CONDITION }
+        require(splitNumber.distinct().size == 6) { ErrorType.LOTTO_NUMBER_INPUT_NOT_DUPLICATION }
     }
 
     fun validateBonusNumberInput(bonusNumber: String) {
         bonusNumber.validateNumberInput()
-        require(bonusNumber.toInt() in MIN_LOTTO_NUMBER_CONDITION..MAX_LOTTO_NUMBER_CONDITION) { "보너스 번호는 1 ~ 45 숫자 범위만 입력 가능합니다." }
+        require(bonusNumber.toInt() in MIN_LOTTO_NUMBER_CONDITION..MAX_LOTTO_NUMBER_CONDITION) { ErrorType.BONUS_NUMBER_INPUT_RANGE_CONDITION }
     }
 
     fun String.validateNumberInput() {
         if (!(this.isNumeric()))
-            throw IllegalArgumentException()
+            throw IllegalArgumentException(ErrorType.INPUT_NOT_NUMBER)
         if (isDecimalNumber())
-            throw IllegalArgumentException()
+            throw IllegalArgumentException(ErrorType.INPUT_DECIMAL)
         if (this.isNegativeNumber())
-            throw IllegalArgumentException()
+            throw IllegalArgumentException(ErrorType.INPUT_NEGATIVE_NUMBER)
     }
 
     private fun String.isNumeric(): Boolean {
@@ -46,6 +50,6 @@ class InputValidator {
         const val LOTTO_NUMBER_COUNT_CONDITION = 6
         const val LOTTO_PRICE_UNIT = 1000
         const val ZERO = 0
-        const val NUMERIC_REGEX_PATTERN = "\"^-?\\\\d+(\\\\.\\\\d+)?\$\""
+        const val NUMERIC_REGEX_PATTERN = "^-?\\d+(\\.\\d+)?$"
     }
 }

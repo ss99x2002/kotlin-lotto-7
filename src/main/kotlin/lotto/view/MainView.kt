@@ -1,17 +1,20 @@
 package lotto.view
 
+import lotto.controller.InputValidator
 import lotto.controller.LottoManager
 import java.lang.IllegalStateException
 
 class MainView(
-    private val inputView: InputView,
-    private val outputView: OutputView,
-    private val lottoManager: LottoManager,
+    private val inputView: InputView = InputView(InputValidator()),
+    private val outputView: OutputView = OutputView(),
+    private val lottoManager: LottoManager = LottoManager(),
 ) {
 
     fun start() {
         while (true) {
             try {
+                lottoManager.clearLottoManager()
+
                 val count = inputPurchaseCount()
                 outputView.printLottoPurchaseCount(count)
 
@@ -22,34 +25,53 @@ class MainView(
                 val bonusNumbers = inputBonusNumber()
 
                 lottoManager.checkWinning(winningNumbers, bonusNumbers)
+                outputView.printLottoWinningStat()
+                outputView.printLottoEarningRate(lottoManager.calculateEarningRate(count))
 
             } catch (e: IllegalArgumentException) {
-                println(e.message)
+                println("[ERROR]" + e.message)
             } catch (e: IllegalStateException) {
-                println(e.message)
+                println("[ERROR]" + e.message)
             }
         }
     }
 
     fun inputPurchaseCount(): Int {
-        val purchasePrice = inputView.getLottoPurchasePrice()
-        inputView.validateInputPrice(purchasePrice)
-        return purchasePrice.toInt() / 1000
+        while (true) {
+            try {
+                val purchasePrice = inputView.getLottoPurchasePrice()
+                inputView.validateInputPrice(purchasePrice)
+                return (purchasePrice.toInt() / 1000)
+            } catch (e: IllegalArgumentException) {
+                println("[ERROR] ${e.message}")
+            }
+        }
     }
 
     fun inputWinningNumbers(): List<Int> {
-        val winningNumbers = inputView.getWinningNumbers()
-        inputView.validateInputWinningNumbers(winningNumbers)
-        return winningNumbers.split(",").map { it.toInt() }
+        while (true) {
+            try {
+                val winningNumbers = inputView.getWinningNumbers()
+                inputView.validateInputWinningNumbers(winningNumbers)
+                return winningNumbers.split(",").map { it.toInt() }
+            } catch (e: IllegalArgumentException) {
+                println("[ERROR] ${e.message}")
+            }
+        }
     }
 
     fun inputBonusNumber(): Int {
-        val bonusNumber = inputView.getBonusNumber()
-        inputView.validateInputBonusNumber(bonusNumber)
-        return bonusNumber.toInt()
+        while (true) {
+            try {
+                val bonusNumber = inputView.getBonusNumber()
+                inputView.validateInputBonusNumber(bonusNumber)
+                return bonusNumber.toInt()
+            } catch (e: IllegalArgumentException) {
+                println("[ERROR] ${e.message}")
+            }
+        }
     }
 
     companion object {
-        const val LOTTO_TICKET_PRICE = 1000
     }
 }

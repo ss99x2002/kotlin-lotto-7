@@ -1,5 +1,8 @@
 package lotto
 
+import lotto.view.MainView
+
 fun main() {
-    // TODO: 프로그램 구현
+    val mainView = MainView()
+    mainView.start()
 }

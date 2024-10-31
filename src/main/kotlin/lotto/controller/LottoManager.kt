@@ -1,14 +1,9 @@
 package lotto.controller
 
 import camp.nextstep.edu.missionutils.Randoms
-import lotto.model.Lotto
 import lotto.model.Winning
-import lotto.view.OutputView
 
-class LottoManager(
-    private val lotto: Lotto,
-    private val outputView: OutputView
-) {
+class LottoManager() {
 
     private var _userLottoNumbers: MutableList<Lotto> = mutableListOf()
     val userLottoNumbers: List<Lotto> get() = _userLottoNumbers
@@ -21,8 +16,33 @@ class LottoManager(
 
     fun checkWinning(winningNumbers: List<Int>, bonusNumber: Int) {
         _userLottoNumbers.forEach {
-            it.checkWinningCount(winningNumbers, bonusNumber)
+            val winning = it.checkWinningCount(winningNumbers, bonusNumber)
+            incrementWinningCount(winning)
         }
+    }
+
+    fun calculateEarningRate(count: Int): Double {
+        var revenue = Winning.entries.sumOf {
+            if (it.getCount() > 0) it.price else 0
+        }
+        return ((revenue / (count * 1000)) * 100).toDouble()
+    }
+
+    fun incrementWinningCount(winning: Winning) {
+        winning.increase()
+    }
+
+    fun clearLottoManager() {
+        clearUserLottoNumbers()
+        clearWinningCounts()
+    }
+
+    private fun clearUserLottoNumbers() {
+        _userLottoNumbers.clear()
+    }
+
+    private fun clearWinningCounts() {
+        Winning.entries.forEach { it.clear() }
     }
 
     fun generateRandomNumber(): List<Int> {
