@@ -1,77 +1,55 @@
 package lotto.view
 
-import lotto.controller.InputValidator
-import lotto.controller.LottoManager
-import java.lang.IllegalStateException
+import lotto.controller.LottoController
+import lotto.handler.InputHandler
+import lotto.handler.OutputHandler
 
 class MainView(
-    private val inputView: InputView = InputView(InputValidator()),
-    private val outputView: OutputView = OutputView(),
-    private val lottoManager: LottoManager = LottoManager(),
+    private val inputHandler: InputHandler,
+    private val outputHandler: OutputHandler,
+    private val lottoController: LottoController
 ) {
 
     fun start() {
         while (true) {
             try {
-                lottoManager.clearLottoManager()
-
+                lottoController.clearLottoNumbers()
+                // 구매
                 val count = inputPurchaseCount()
-                outputView.printLottoPurchaseCount(count)
 
-                lottoManager.generateUserLottoNumbers(count)
-                outputView.printLottoGenerateNumber(lottoManager.userLottoNumbers)
+                // 유저 로또 번호, 당첨 번호, 보너스 번호
+                generateNumbers(count)
+                val winningNumbers = inputHandler.inputWinningNumbers()
+                val bonusNumber = inputHandler.inputBonusNumber(winningNumbers)
 
-                val winningNumbers = inputWinningNumbers()
-                val bonusNumbers = inputBonusNumber()
+                // 당첨 확인 및 통계 출력
+                checkWinning(winningNumbers, bonusNumber)
+                checkEarningRate(count)
 
-                lottoManager.checkWinning(winningNumbers, bonusNumbers)
-                outputView.printLottoWinningStat()
-                outputView.printLottoEarningRate(lottoManager.calculateEarningRate(count))
-
-            } catch (e: IllegalArgumentException) {
-                println("[ERROR]" + e.message)
-            } catch (e: IllegalStateException) {
+            } catch (e: Exception) {
                 println("[ERROR]" + e.message)
             }
         }
     }
 
     fun inputPurchaseCount(): Int {
-        while (true) {
-            try {
-                val purchasePrice = inputView.getLottoPurchasePrice()
-                inputView.validateInputPrice(purchasePrice)
-                return (purchasePrice.toInt() / 1000)
-            } catch (e: IllegalArgumentException) {
-                println("[ERROR] ${e.message}")
-            }
-        }
+        val count = inputHandler.inputPurchaseCount()
+        outputHandler.printPurchaseCount(count)
+        return count
     }
 
-    fun inputWinningNumbers(): List<Int> {
-        while (true) {
-            try {
-                val winningNumbers = inputView.getWinningNumbers()
-                inputView.validateInputWinningNumbers(winningNumbers)
-                return winningNumbers.split(",").map { it.toInt() }
-            } catch (e: IllegalArgumentException) {
-                println("[ERROR] ${e.message}")
-            }
-        }
+    fun generateNumbers(count: Int) {
+        val generatedNumbers = lottoController.generateUserLottoNumbers(count)
+        outputHandler.printGeneratedNumbers(generatedNumbers)
     }
 
-    fun inputBonusNumber(): Int {
-        while (true) {
-            try {
-                val bonusNumber = inputView.getBonusNumber()
-                inputView.validateInputBonusNumber(bonusNumber)
-                return bonusNumber.toInt()
-            } catch (e: IllegalArgumentException) {
-                println("[ERROR] ${e.message}")
-            }
-        }
+    fun checkWinning(winningNumbers: List<Int>, bonusNumber: Int) {
+        lottoController.checkWinning(winningNumbers, bonusNumber)
+        outputHandler.printWinningStatistics(lottoController.getWinningResult())
     }
 
-    companion object {
+    fun checkEarningRate(count: Int) {
+        val earningRate = lottoController.calculateEarningRate(count)
+        outputHandler.printEarningRate(earningRate)
     }
 }
